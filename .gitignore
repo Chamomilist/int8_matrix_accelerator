@@ -1,0 +1,48 @@
+# ===============================
+# Simulation Outputs
+# ===============================
+*.vcd
+*.fst
+*.lxt
+*.ghw
+*.wlf
+
+# GTKWave Save Files
+*.gtkw
+
+# Executables
+*.out
+*.exe
+
+# Object Files
+*.o
+
+# Logs
+*.log
+
+# Temporary Files
+*.tmp
+*.bak
+
+# Yosys Outputs
+*.json
+*.blif
+*.ilang
+
+# Generated Netlists
+*_netlist.v
+
+# Build Directories
+build/
+sim/
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code / VSCodium
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
