@@ -5,6 +5,10 @@ module tb_mac;
     parameter DATA_WIDTH = 8;
     parameter ACC_WIDTH  = 32;
 
+    // Number of clock cycles from applying MAC inputs
+    // to observing a valid accumulated result.
+    localparam int MAC_LATENCY = 1;
+
     logic clk;
     logic rst;
     logic clear;
@@ -38,28 +42,31 @@ module tb_mac;
         input signed [DATA_WIDTH-1:0] in_a;
         input signed [DATA_WIDTH-1:0] in_b;
         begin
+
+            @(negedge clk);
             a = in_a;
             b = in_b;
 
             expected = expected + (in_a * in_b);
 
-            @(posedge clk);
+            repeat (MAC_LATENCY) @(posedge clk);
             #1;
 
             if (product_out !== (in_a * in_b)) begin
                 $display("FAIL | Product Expected %0d Got %0d",
-                        (in_a * in_b), product_out);
+                         (in_a * in_b), product_out);
                 $finish;
             end
 
             if (result !== expected) begin
                 $display("FAIL | Result Expected %0d Got %0d",
-                        expected, result);
+                         expected, result);
                 $finish;
             end
 
             $display("PASS | %0d x %0d = %0d | Acc = %0d",
-                    in_a, in_b, product_out, result);
+                     in_a, in_b, product_out, result);
+
         end
     endtask
 
@@ -78,8 +85,7 @@ module tb_mac;
 
         expected = 0;
 
-        @(posedge clk);
-        #1;
+        repeat (2) @(posedge clk);
 
         rst = 0;
         enable = 1;
@@ -88,6 +94,7 @@ module tb_mac;
         mac_step(4,5);
         mac_step(-2,8);
 
+        @(negedge clk);
         clear = 1;
 
         @(posedge clk);
@@ -96,7 +103,7 @@ module tb_mac;
         clear = 0;
         expected = 0;
 
-        if(result !== 0) begin
+        if (result !== 0) begin
             $display("FAIL | Clear failed");
             $finish;
         end
@@ -104,15 +111,15 @@ module tb_mac;
         mac_step(10,10);
         mac_step(-5,-4);
 
+        @(negedge clk);
         enable = 0;
-
         a = 7;
         b = 7;
 
         @(posedge clk);
         #1;
 
-        if(result !== expected) begin
+        if (result !== expected) begin
             $display("FAIL | Enable failed");
             $finish;
         end
