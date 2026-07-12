@@ -1,9 +1,9 @@
 module controller (
-    input  logic clk,
-    input  logic rst,
+    input logic clk,
+    input logic rst,
 
-    input  logic start,
-    input  logic buffer_done,
+    input logic start,
+    input logic buffer_done,
 
     output logic enable,
     output logic clear,
@@ -29,7 +29,6 @@ end
 always_comb begin
 
     next_state = state;
-
     enable = 1'b0;
     clear  = 1'b0;
     done   = 1'b0;
