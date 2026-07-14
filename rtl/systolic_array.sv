@@ -10,15 +10,19 @@ module systolic_array #(
     input logic clear,
     input logic enable,
 
-    input logic signed [DATA_WIDTH-1:0] a_in [ROWS],
-    input logic signed [DATA_WIDTH-1:0] b_in [COLS],
-    input logic valid_in [ROWS],
 
-    output logic signed [ACC_WIDTH-1:0] result [ROWS][COLS]
+    // Packed array ports for better simulator compatibility
+    input logic signed [ROWS-1:0][DATA_WIDTH-1:0] a_in,
+    input logic signed [COLS-1:0][DATA_WIDTH-1:0] b_in,
+    input logic [ROWS-1:0] valid_in,
+
+    output logic signed [ROWS-1:0][COLS-1:0][ACC_WIDTH-1:0] result
+
 );
 
-logic signed [DATA_WIDTH-1:0] a_bus [ROWS][COLS+1];
-logic signed [DATA_WIDTH-1:0] b_bus [ROWS+1][COLS];
+// Internal buses converted to packed arrays too for the same reason
+logic signed [ROWS-1:0][COLS:0][DATA_WIDTH-1:0] a_bus;
+logic signed [ROWS:0][COLS-1:0][DATA_WIDTH-1:0] b_bus;
 
 logic valid_bus [ROWS][COLS+1];
 
