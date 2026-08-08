@@ -1,32 +1,32 @@
-`timescale 1ns/1ps
+`timescale 1ns / 1ps
 
 module tb_controller;
 
-logic clk;
-logic rst;
+  logic clk;
+  logic rst;
 
-logic start;
-logic buffer_done;
+  logic start;
+  logic buffer_done;
 
-logic enable;
-logic clear;
-logic done;
+  logic enable;
+  logic clear;
+  logic done;
 
-controller dut (
-    .clk(clk),
-    .rst(rst),
+  controller dut (
+      .clk(clk),
+      .rst(rst),
 
-    .start(start),
-    .buffer_done(buffer_done),
+      .start(start),
+      .buffer_done(buffer_done),
 
-    .enable(enable),
-    .clear(clear),
-    .done(done)
-);
+      .enable(enable),
+      .clear (clear),
+      .done  (done)
+  );
 
-always #5 clk = ~clk;
+  always #5 clk = ~clk;
 
-initial begin
+  initial begin
 
     $dumpfile("results/controller.vcd");
     $dumpvars(0, tb_controller);
@@ -37,7 +37,7 @@ initial begin
     start = 0;
     buffer_done = 0;
 
-    repeat(2) @(posedge clk);
+    repeat (2) @(posedge clk);
 
     rst = 0;
 
@@ -46,10 +46,11 @@ initial begin
     //------------------------------------
 
     @(posedge clk);
+    #1;
 
-    if(!clear) begin
-        $display("FAIL | Controller not in IDLE");
-        $finish;
+    if (clear || enable) begin
+      $display("FAIL | Controller left IDLE without start");
+      $finish;
     end
 
     //------------------------------------
@@ -60,6 +61,12 @@ initial begin
     start = 1;
 
     @(posedge clk);
+    #1;
+
+    if (!clear) begin
+      $display("FAIL | Controller did not enter LOAD after start");
+      $finish;
+    end
 
     //------------------------------------
     // COMPUTE
@@ -67,9 +74,9 @@ initial begin
 
     @(posedge clk);
 
-    if(!enable) begin
-        $display("FAIL | Enable not asserted");
-        $finish;
+    if (!enable) begin
+      $display("FAIL | Enable not asserted");
+      $finish;
     end
 
     //------------------------------------
@@ -79,12 +86,12 @@ initial begin
     @(negedge clk);
     buffer_done = 1;
 
-    @(posedge clk);
-    @(posedge clk);
+    repeat (4) @(posedge clk);
+    #1;
 
-    if(!done) begin
-        $display("FAIL | Done not asserted");
-        $finish;
+    if (!done) begin
+      $display("FAIL | Done not asserted");
+      $finish;
     end
 
     //------------------------------------
@@ -97,10 +104,11 @@ initial begin
 
     @(posedge clk);
     @(posedge clk);
+    #1;
 
-    if(!clear) begin
-        $display("FAIL | Controller did not return to IDLE");
-        $finish;
+    if (clear || enable || done) begin
+      $display("FAIL | Controller did not return to IDLE");
+      $finish;
     end
 
     $display("");
@@ -111,6 +119,6 @@ initial begin
 
     $finish;
 
-end
+  end
 
 endmodule

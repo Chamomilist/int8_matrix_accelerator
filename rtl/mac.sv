@@ -1,10 +1,12 @@
+`timescale 1ns / 1ps
+
 // Integrates the standalone multiplier and accumulator modules into a single
 // multiply-accumulate (MAC) unit used throughout the accelerator.
 
 module mac #(
     parameter int DATA_WIDTH = 8,
     parameter int ACC_WIDTH  = 32
-)(
+) (
     input logic clk,
     input logic rst,
     input logic clear,
@@ -17,19 +19,29 @@ module mac #(
     output logic signed [ACC_WIDTH-1:0] result
 );
 
-logic signed [ACC_WIDTH-1:0] product_ext;
+  logic signed [ACC_WIDTH-1:0] product_ext;
 
-assign product_out = a * b;
+  multiplier #(
+      .DATA_WIDTH(DATA_WIDTH)
+  ) u_multiplier (
+      .a(a),
+      .b(b),
+      .product(product_out)
+  );
 
-assign product_ext = {{(ACC_WIDTH-(2*DATA_WIDTH)){product_out[(2*DATA_WIDTH)-1]}}, product_out};
+  assign product_ext = {
+    {(ACC_WIDTH - (2 * DATA_WIDTH)) {product_out[(2*DATA_WIDTH)-1]}}, product_out
+  };
 
-always_ff @(posedge clk) begin
-    if (rst)
-        result <= '0;
-    else if (clear)
-        result <= '0;
-    else if (enable)
-        result <= result + product_ext;
-end
+  accumulator #(
+      .DATA_WIDTH(ACC_WIDTH)
+  ) u_accumulator (
+      .clk(clk),
+      .rst(rst),
+      .clear(clear),
+      .enable(enable),
+      .data_in(product_ext),
+      .acc_out(result)
+  );
 
 endmodule
